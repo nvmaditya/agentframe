@@ -40,7 +40,7 @@ Phase 1 is one implementation-plan-sized slice: a synchronous, in-process, code-
 | `memory` extra (deliberate/spontaneous recall, SQLite store, idle consolidation) | Working memory in Phase 1 is instance fields plus the event log. The MemoryAPI is a real module, not a stub. |
 | `rag` extra (`Retriever`, ingestion, vector-store adapters) | Product goal G5, not this build. The removable-test rule is recorded so Phase 2 cannot leak into `core`. |
 | `compose` extra (manager/worker helpers, blackboard-over-history) | Multi-agent in Phase 1 is ordinary object composition: assign an `Agent` to a field. No helper ships. |
-| Generator / async pause-resume, streaming | Phase 1 `ModelClient.complete` and `AgentRuntime.run` are synchronous. |
+| Generator / async pause-resume, streaming | Phase 1 `ModelClient.complete` and `AgentRuntime.run` are synchronous. Generator pause/resume later shipped as `AgentRuntime.iterate()` / `Paused` (`run()` still drains). Token streaming and `async def` agentic methods stay later. |
 | Container / gVisor / per-action subprocess `Executor` | Host isolation is a deployment concern. Per-action subprocess would break pass-by-reference. |
 | Persistent event-log backends (SQLite/file/Postgres) | Default is in-memory until a durability need exists. |
 | `litellm`, native Anthropic adapter, multimodal content | One `ModelClient` protocol + one OpenAI-compatible adapter. Text in, text out. |
@@ -543,7 +543,7 @@ The following are easy to “just add” and are explicitly **not** Phase 1:
 - `Retriever` / vector stores / `agentframe[rag]`
 - MCP *server* role (export an `Agent` over MCP), sampling, `resources/subscribe`, `roots`, in-library MCP config-file loading
 - `compose()`, pub/sub helpers
-- `async def` agentic methods, generator pause/resume, token streaming
+- `async def` agentic methods, token streaming (generator pause/resume shipped as `iterate()` / `Paused`)
 - Subprocess or container executors
 - Persistent `EventLog` adapters
 - `@tool` decorator (rejected, not deferred)
@@ -558,5 +558,5 @@ The following are easy to “just add” and are explicitly **not** Phase 1:
 
 - Placeholders: none. Every PRD open question and both contradictions have a chosen option. MCP consume is a closed decision (composed `McpClient`, extra after the loop).
 - Consistency: sandbox is in-process everywhere (architecture, components, data flow, testing, deferred list). Tools are body-convention everywhere; `@tool` appears only as the rejected alternative. MCP is never a JSON tool-call sidecar.
-- Scope: Phase 1 is still the five-module loop plus the composed-field catalog. The `mcp` extra is designed in this spec and is not in the Phase 1 install. RAG, compose, pause/resume, container sandbox stay later.
+- Scope: Phase 1 is still the five-module loop plus the composed-field catalog. The `mcp` extra is designed in this spec and is not in the Phase 1 install. RAG, compose, and generator pause/resume (`iterate` / `Paused`) shipped later; container sandbox stays later.
 - Ambiguity closed: entry method defaults to `run`; `run` returns the raw validated value; Predict vs CodeAct behavior; preview caps; closed event-type set; closed AST reject list; scripted E2E, not VCR; `self.events` is the bound `EventLog`; `__runtime__` and `events` are reserved names; MCP tools are methods on a field; host calls `connect()` before `run`; stdio + Streamable HTTP + fake transports; no config-file parser.

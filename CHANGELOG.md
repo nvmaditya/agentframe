@@ -14,3 +14,4 @@ Phase 1 of the OOP-native agent loop.
 - `agentframe[mcp]` — consume MCP servers as composed objects (`McpClient`, fake / stdio / Streamable HTTP)
 - `agentframe[rag]` — composed `Retriever`, `IngestionPipeline`, in-memory `VectorStore`
 - `agentframe[compose]` — `compose()` field assignment and `Blackboard` over `EventLog`
+- `AgentRuntime.iterate()` — generator pause/resume; yields `Paused` after a non-terminating CodeAct turn. `run()` still drains to a validated return.

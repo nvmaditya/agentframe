@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
+from collections.abc import Iterator
 from typing import Any, get_type_hints
 
 from pydantic import ValidationError
@@ -15,6 +16,7 @@ from agentframe.history.log import EventLog
 from agentframe.runtime.context import bind_arguments, static_prefix
 from agentframe.runtime.errors import TurnLimitExceeded
 from agentframe.runtime.model import ModelClient, ModelMessage
+from agentframe.runtime.pause import Paused
 from agentframe.runtime.preview import preview
 from agentframe.sandbox.executor import Executor
 from agentframe.sandbox.result import ExecutionResult
@@ -35,6 +37,11 @@ class AgentRuntime:
         self.default_agent_id = default_agent_id
 
     def run(self, agent: Agent, *args: Any, method: str = "run", **kwargs: Any) -> Any:
+        return _drain(self.iterate(agent, *args, method=method, **kwargs))
+
+    def iterate(
+        self, agent: Agent, *args: Any, method: str = "run", **kwargs: Any
+    ) -> Iterator[Paused]:
         spec = type(agent).__agentframe_agentic__.get(method)
         if spec is None:
             if hasattr(agent, method):
@@ -45,14 +52,16 @@ class AgentRuntime:
         agent_id = self.default_agent_id or f"{type(agent).__name__}-{id(agent):x}"
         self._append("TaskStarted", {"method": method}, agent_id)
         try:
-            return self._invoke(agent, spec, args, kwargs)
+            if isinstance(spec.strategy, PredictStrategy):
+                return self._predict(agent, spec, args, kwargs)
+            return (yield from self._codeact_iter(agent, spec, args, kwargs))
         finally:
             agent.__runtime__ = None
 
     def _invoke(self, agent: Agent, spec: AgenticSpec, args: tuple[Any, ...], kwargs: dict[str, Any]) -> Any:
         if isinstance(spec.strategy, PredictStrategy):
             return self._predict(agent, spec, args, kwargs)
-        return self._codeact(agent, spec, args, kwargs)
+        return _drain(self._codeact_iter(agent, spec, args, kwargs))
 
     def _predict(self, agent: Agent, spec: AgenticSpec, args: tuple[Any, ...], kwargs: dict[str, Any]) -> Any:
         strategy = spec.strategy
@@ -77,7 +86,9 @@ class AgentRuntime:
         assert last_error is not None
         raise last_error
 
-    def _codeact(self, agent: Agent, spec: AgenticSpec, args: tuple[Any, ...], kwargs: dict[str, Any]) -> Any:
+    def _codeact_iter(
+        self, agent: Agent, spec: AgenticSpec, args: tuple[Any, ...], kwargs: dict[str, Any]
+    ) -> Iterator[Paused]:
         strategy = spec.strategy
         assert isinstance(strategy, CodeActStrategy)
         bound = bind_arguments(spec.fn, args, kwargs)
@@ -118,6 +129,9 @@ class AgentRuntime:
                     value = validate_output(box[0], annotation)
                 except ValidationError as exc:
                     self._append("ValidationError", {"error": str(exc)}, agent_id)
+                    if turn + 1 >= strategy.max_turns:
+                        raise TurnLimitExceeded(strategy.max_turns) from exc
+                    yield Paused()
                     continue
                 self._append("Termination", {"ok": True}, agent_id)
                 return value
@@ -125,10 +139,11 @@ class AgentRuntime:
             if result.display is not None:
                 observation = (observation + "\n" + preview("display", result.display)).strip()
             if result.error is not None:
-                observation = (observation + "\n" + "".join(
-                    _format_error(result.error)
-                )).strip()
+                observation = (observation + "\n" + _format_error(result.error)).strip()
             self._append("Observation", {"text": observation[:8000]}, agent_id)
+            if turn + 1 >= strategy.max_turns:
+                raise TurnLimitExceeded(strategy.max_turns)
+            yield Paused()
         raise TurnLimitExceeded(strategy.max_turns)
 
     def _messages(
@@ -164,6 +179,14 @@ class AgentRuntime:
 
     def _agent_id(self, agent: Agent) -> str:
         return self.default_agent_id or f"{type(agent).__name__}-{id(agent):x}"
+
+
+def _drain(steps: Iterator[Paused]) -> Any:
+    try:
+        while True:
+            next(steps)
+    except StopIteration as done:
+        return done.value
 
 
 def _parse_predict(content: str) -> Any:

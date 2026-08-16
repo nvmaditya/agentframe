@@ -12,6 +12,8 @@ Synchronous think → act → observe. In-process cells. In-memory events. Scrip
 - **`agentframe[rag]`** — implemented. Composed `Retriever` + `IngestionPipeline` + in-memory `VectorStore`. Never `Agent.retrieve()`.
 - **`compose` extra implemented.** `compose()` assigns agents to fields; `Blackboard` is pub/sub over a caller-owned `EventLog`. No extra agent base class.
 
-## Phase 3 — named only
+## Phase 3 — hardening
 
-Async / generator pause-resume, container/gVisor `Executor`, mutation testing on `core` and `contracts`.
+- **Pause/resume** — implemented. `AgentRuntime.iterate()` is a generator that yields `Paused` after a non-terminating CodeAct turn. Resume is `next()` on the same generator (same agent, same `EventLog`, same REPL locals). `run()` still drains to a validated return. Nested `_invoke` (calling an agentic method as a bound method) still runs to completion.
+- **Container / gVisor `Executor`** — not built.
+- **Mutation testing** on `core` / `contracts` — not built.

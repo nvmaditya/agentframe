@@ -37,9 +37,9 @@ If those three disagree, the **design spec wins** (it closed the PRD’s contrad
 |---|---|---|
 | 1 | implemented | `contracts`, `history`, `core`, `sandbox`, `runtime` |
 | 2 | mcp, rag, and compose extras implemented | composed `McpClient`, `Retriever`, `compose()` / `Blackboard` |
-| 3 | named only | async pause/resume, container/gVisor executor, mutation testing |
+| 3 | pause/resume implemented; container and mutation deferred | `AgentRuntime.iterate` / `Paused`; gVisor executor; mutation testing |
 
-Phase 2 extras are implemented. Do not start Phase 3 in a Phase 2 PR.
+Phase 2 extras and generator pause/resume are implemented. Container/gVisor `Executor` and mutation testing stay deferred.
 
 ## Module rules
 

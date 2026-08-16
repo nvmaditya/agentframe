@@ -7,12 +7,14 @@ from agentframe.runtime.model import (
     ScriptExhausted,
     ScriptedModelClient,
 )
+from agentframe.runtime.pause import Paused
 
 __all__ = [
     "AgentRuntime",
     "ModelClient",
     "ModelMessage",
     "ModelResponse",
+    "Paused",
     "ScriptExhausted",
     "ScriptedModelClient",
     "TurnLimitExceeded",
