@@ -42,7 +42,7 @@ Requires Python 3.11+. The only hard dependency is Pydantic v2.
 
 ## Status
 
-Phase 1 of the loop is implemented: `core`, `contracts`, `history`, `sandbox`, `runtime`. MCP consume ships as `agentframe[mcp]`. Retrieval ships as `agentframe[rag]` (`from agentframe.rag import Retriever`). Multi-agent helpers are specified and not in this install.
+Phase 1 of the loop is implemented: `core`, `contracts`, `history`, `sandbox`, `runtime`. Extras: `agentframe[mcp]`, `agentframe[rag]`, `agentframe[compose]`.
 
 Documented examples live in [`examples/`](examples/) and are the Feature/E2E suite.
 
@@ -64,6 +64,7 @@ Documented examples live in [`examples/`](examples/) and are the Feature/E2E sui
 | A contract | a return annotation |
 | An MCP server | a composed field (`McpClient` from `agentframe.mcp`) |
 | Retrieval | a composed field (`Retriever` from `agentframe.rag`) |
+| Another agent | `compose(manager, worker=Worker())` |
 
 The model never gets a JSON tool list. It gets Python, and `return_result(value)` is accepted only when `value` passes the return type.
 
