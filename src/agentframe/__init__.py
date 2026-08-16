@@ -9,6 +9,16 @@ from agentframe.core import (
     strategy,
 )
 from agentframe.history import Event, EventLog, InMemoryEventLog
+from agentframe.runtime import (
+    AgentRuntime,
+    ModelClient,
+    ModelMessage,
+    ModelResponse,
+    ScriptExhausted,
+    ScriptedModelClient,
+    TurnLimitExceeded,
+)
+from agentframe.runtime.openai import OpenAICompatibleClient
 from agentframe.sandbox import (
     ExecutionResult,
     ExecutionTimeout,
@@ -34,5 +44,13 @@ __all__ = [
     "ExecutionTimeout",
     "Executor",
     "InProcessExecutor",
+    "AgentRuntime",
+    "ModelClient",
+    "ModelMessage",
+    "ModelResponse",
+    "OpenAICompatibleClient",
+    "ScriptExhausted",
+    "ScriptedModelClient",
+    "TurnLimitExceeded",
 ]
 
