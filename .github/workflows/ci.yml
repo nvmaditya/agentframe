@@ -17,9 +17,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install
-        run: uv sync --extra dev
+        run: |
+          uv sync --extra dev
+          uv pip install -e .
+      - name: Prove we import src/
+        run: |
+          uv run python -c "import agentframe, pathlib; p=pathlib.Path(agentframe.__file__).resolve(); print(p); assert 'src' in p.parts, p"
       - name: Tests
-        # Import and measure src/agentframe (CI wheel copies are not the scored tree).
         run: uv run pytest --cov=src/agentframe --cov-report=term-missing --cov-fail-under=90
       - name: Import contracts
         run: uv run lint-imports
@@ -32,7 +36,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install
-        run: uv sync --extra dev
+        run: |
+          uv sync --extra dev
+          uv pip install -e .
       - name: Core and contracts without touching adapters
         run: uv run pytest tests/core tests/contracts -q
       - name: Import contracts
