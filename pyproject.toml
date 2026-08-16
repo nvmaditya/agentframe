@@ -44,7 +44,7 @@ packages = ["src/agentframe"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = ["src", "."]
 markers = [
     "capability: interface-capability suite (scripted in CI; live models opt-in)",
     "adversarial: sandbox security cases",
@@ -52,14 +52,9 @@ markers = [
 
 [tool.coverage.run]
 branch = true
-source_pkgs = ["agentframe"]
+source = ["src/agentframe"]
 relative_files = true
-
-[tool.coverage.paths]
-source = [
-    "src/agentframe",
-    "*/site-packages/agentframe",
-]
+omit = ["*/site-packages/*"]
 
 [tool.coverage.report]
 fail_under = 90
