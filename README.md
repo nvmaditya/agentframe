@@ -42,7 +42,7 @@ Requires Python 3.11+. The only hard dependency is Pydantic v2.
 
 ## Status
 
-Phase 1 of the loop is implemented: `core`, `contracts`, `history`, `sandbox`, `runtime`. MCP consume, RAG, and multi-agent helpers are specified and not in this install.
+Phase 1 of the loop is implemented: `core`, `contracts`, `history`, `sandbox`, `runtime`. MCP consume ships as `agentframe[mcp]` (`from agentframe.mcp import McpClient`). RAG and multi-agent helpers are specified and not in this install.
 
 Documented examples live in [`examples/`](examples/) and are the Feature/E2E suite.
 
@@ -62,7 +62,7 @@ Documented examples live in [`examples/`](examples/) and are the Feature/E2E sui
 | An LLM loop | a method whose body is `...` |
 | How the loop runs | `@strategy(PredictStrategy())` or CodeAct (default) |
 | A contract | a return annotation |
-| An MCP server | a composed field (Phase 2 extra) |
+| An MCP server | a composed field (`McpClient` from `agentframe.mcp`) |
 
 The model never gets a JSON tool list. It gets Python, and `return_result(value)` is accepted only when `value` passes the return type.
 

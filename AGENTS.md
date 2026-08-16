@@ -36,10 +36,10 @@ If those three disagree, the **design spec wins** (it closed the PRD’s contrad
 | Phase | Status | Modules |
 |---|---|---|
 | 1 | implemented | `contracts`, `history`, `core`, `sandbox`, `runtime` |
-| 2 | specified, not built | `mcp` extra (composed `McpClient`), `rag`, `compose` |
+| 2 | mcp extra implemented; rag/compose not built | composed `McpClient`; `rag` and `compose` still specified only |
 | 3 | named only | async pause/resume, container/gVisor executor, mutation testing |
 
-Do not start Phase 2 work in a Phase 1 PR.
+Do not start `rag` / `compose` in a Phase 1 or mcp PR.
 
 ## Module rules
 

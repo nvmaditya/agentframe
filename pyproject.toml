@@ -102,4 +102,18 @@ forbidden_modules = [
     "agentframe.sandbox.inprocess",
     "agentframe.history.memory",
     "agentframe.runtime.openai",
+    "agentframe.mcp.stdio",
+    "agentframe.mcp.http",
+    "agentframe.mcp.fake",
+]
+
+[[tool.importlinter.contracts]]
+name = "core and runtime do not import mcp"
+type = "forbidden"
+source_modules = [
+    "agentframe.core",
+    "agentframe.runtime",
+]
+forbidden_modules = [
+    "agentframe.mcp",
 ]

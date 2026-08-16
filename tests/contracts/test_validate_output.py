@@ -42,6 +42,17 @@ def test_optional_none_passes() -> None:
     assert validate_output(None, Optional[int]) is None
 
 
+def test_json_schema_object_validates_required_fields() -> None:
+    schema = {
+        "type": "object",
+        "properties": {"text": {"type": "string"}},
+        "required": ["text"],
+    }
+    assert validate_output({"text": "hi"}, schema).text == "hi"
+    with pytest.raises(ValidationError):
+        validate_output({}, schema)
+
+
 def test_literal_must_match() -> None:
     assert validate_output("on", Literal["on", "off"]) == "on"
     with pytest.raises(ValidationError):

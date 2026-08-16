@@ -25,16 +25,29 @@ def field_catalog(agent: Agent) -> list[str]:
             continue
         if isinstance(value, (str, bytes, int, float, bool, type(None))):
             continue
-        for attr, member in type(value).__dict__.items():
-            if attr.startswith("_") or not callable(member):
-                continue
+        for attr, member in _public_callables(value):
+            extra = getattr(member, "__tool_schema__", None)
             try:
-                schema = schema_from_signature(member)
+                schema = extra if isinstance(extra, dict) else schema_from_signature(member)
             except (TypeError, ValueError):
                 schema = {}
             doc = inspect.getdoc(member) or ""
-            lines.append(f"self.{name}.{attr}{inspect.signature(member)} {doc} {schema.get('return', '')}".strip())
+            try:
+                sig = str(inspect.signature(member))
+            except (TypeError, ValueError):
+                sig = "(...)"
+            lines.append(f"self.{name}.{attr}{sig} {doc} {schema.get('return', '')}".strip())
     return lines
+
+
+def _public_callables(obj: Any) -> list[tuple[str, Any]]:
+    found: dict[str, Any] = {}
+    for src in (type(obj).__dict__, getattr(obj, "__dict__", {})):
+        for attr, member in src.items():
+            if attr.startswith("_") or not callable(member):
+                continue
+            found[attr] = getattr(obj, attr, member)
+    return list(found.items())
 
 
 def static_prefix(agent: Agent, spec: AgenticSpec) -> str:

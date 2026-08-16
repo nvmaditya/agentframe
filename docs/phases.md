@@ -6,11 +6,11 @@
 
 Synchronous think → act → observe. In-process cells. In-memory events. Scripted E2E.
 
-## Phase 2 — extras (specified, not built)
+## Phase 2 — extras
 
-- **`agentframe[mcp]`** — consume MCP servers as composed objects (`self.github.create_issue(...)`). Design: spec §4.6 and §8.6. Phase 1 already publishes methods on public fields so this extra does not rewrite `runtime`.
-- **`agentframe[rag]`** — composed `Retriever`. Never `Agent.retrieve()`.
-- **`compose`** — helpers for agent-as-field. Composition already works as ordinary assignment.
+- **`agentframe[mcp]`** — implemented. Consume MCP servers as composed objects (`self.github.create_issue(...)`). Fake, stdio, and Streamable HTTP transports. Design: spec §4.6 and §8.6.
+- **`agentframe[rag]`** — specified, not built. Composed `Retriever`. Never `Agent.retrieve()`.
+- **`compose`** — specified, not built. Helpers for agent-as-field. Composition already works as ordinary assignment.
 
 ## Phase 3 — named only
 
