@@ -11,7 +11,7 @@ import time
 from contextlib import redirect_stderr, redirect_stdout
 
 FORBIDDEN_NAMES = frozenset(
-    {"eval", "exec", "compile", "input", "open", "breakpoint", "__import__"}
+    {"eval", "exec", "compile", "input", "open", "breakpoint", "__import__", "vars"}
 )
 FORBIDDEN_ATTRS = frozenset({"__subclasses__", "__globals__", "__code__", "__builtins__"})
 ALLOWED_DUNDER = frozenset({"__name__", "__doc__"})

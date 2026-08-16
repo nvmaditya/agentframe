@@ -93,6 +93,36 @@ f.close()
 "pwned"
 """
 
+_VARS_TYPE_FILEIO_ESCAPE = """
+fn = vars(type)["__subclasses__"]
+seen = []
+stack = [object]
+while stack:
+    cls = stack.pop()
+    try:
+        kids = fn(cls)
+    except Exception:
+        continue
+    for c in kids:
+        seen.append(c)
+        stack.append(c)
+found = None
+for c in seen:
+    try:
+        n = getattr(c, "__name__", "")
+    except Exception:
+        continue
+    if n == "FileIO":
+        found = c
+        break
+if found is None:
+    raise RuntimeError("no FileIO")
+f = found({path!r}, "w")
+f.write(b"pwned")
+f.close()
+"pwned"
+"""
+
 _SOCKET_ESCAPE = """
 seen = []
 def walk(cls, depth=0):
@@ -134,6 +164,15 @@ def test_isolated_cannot_write_via_recovered_fileio(exe: IsolatedExecutor, tmp_p
     secret = tmp_path / "secret.txt"
     secret.write_text("safe")
     result = exe.execute(_FILEIO_ESCAPE.format(path=str(secret)), {})
+    assert result.error is not None
+    assert result.display != "pwned"
+    assert secret.read_text() == "safe"
+
+
+def test_isolated_cannot_write_via_vars_type_fileio(exe: IsolatedExecutor, tmp_path: Path) -> None:
+    secret = tmp_path / "secret.txt"
+    secret.write_text("safe")
+    result = exe.execute(_VARS_TYPE_FILEIO_ESCAPE.format(path=str(secret)), {})
     assert result.error is not None
     assert result.display != "pwned"
     assert secret.read_text() == "safe"
