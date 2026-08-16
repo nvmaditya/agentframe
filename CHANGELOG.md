@@ -17,4 +17,4 @@ Phase 1 of the OOP-native agent loop.
 - `AgentRuntime.iterate()` — generator pause/resume; yields `Paused` after a non-terminating CodeAct turn. `run()` still drains to a validated return
 - CodeAct cells see public agent fields as bare names (`worker.shout(...)` as well as `self.worker.shout(...)`)
 - `OpenAICompatibleClient` accepts optional `temperature`
-- Live Ollama examples: `examples/ollama_greeter.py`, `examples/ollama_team.py`
+- Live Ollama examples: `examples/ollama_greeter.py`, `examples/ollama_team.py`, `examples/ollama_helper.py`

@@ -51,6 +51,8 @@ Live Ollama (default `gemma3:4b` at `http://127.0.0.1:11434`):
 ```bash
 uv run python examples/ollama_greeter.py
 uv run python examples/ollama_team.py
+uv run python examples/ollama_helper.py "What is 6 * 7?"
+uv run python examples/ollama_helper.py
 ```
 
 Override with `OLLAMA_HOST` / `OLLAMA_MODEL`. Live tests skip when the daemon is down or when `GITHUB_ACTIONS=true`.

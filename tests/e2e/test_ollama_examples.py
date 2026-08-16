@@ -9,6 +9,7 @@ import urllib.request
 import pytest
 
 from examples.ollama_greeter import run_example as greet
+from examples.ollama_helper import run_example as help_with
 from examples.ollama_runtime import clean_cell, strip_fences
 from examples.ollama_team import run_example as team
 
@@ -54,3 +55,9 @@ def test_ollama_greeter() -> None:
 @pytest.mark.ollama
 def test_ollama_team() -> None:
     assert team() == "HELLO"
+
+
+@_skip_live
+@pytest.mark.ollama
+def test_ollama_helper() -> None:
+    assert "42" in help_with("What is 6 * 7?")
