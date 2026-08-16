@@ -14,7 +14,7 @@ Instructions for humans and coding agents working in this repository.
 | Agentic methods | public methods whose body is `...` |
 | Prompt | class and method docstrings |
 | Contracts | type annotations + `contracts.validate_output` |
-| Actions | generated Python cells, in-process |
+| Actions | generated Python cells (`InProcessExecutor` default; `IsolatedExecutor` optional) |
 | Workflow | ordinary `if` / `for` / `while` |
 | History | append-only `EventLog` |
 | MCP server | composed field (`McpClient`), not a second protocol |
@@ -37,9 +37,9 @@ If those three disagree, the **design spec wins** (it closed the PRD’s contrad
 |---|---|---|
 | 1 | implemented | `contracts`, `history`, `core`, `sandbox`, `runtime` |
 | 2 | mcp, rag, and compose extras implemented | composed `McpClient`, `Retriever`, `compose()` / `Blackboard` |
-| 3 | pause/resume implemented; container and mutation deferred | `AgentRuntime.iterate` / `Paused`; gVisor executor; mutation testing |
+| 3 | pause/resume and isolated executor implemented; mutation deferred | `AgentRuntime.iterate` / `Paused`; `IsolatedExecutor` (process / gVisor when `runsc` exists); mutation testing |
 
-Phase 2 extras and generator pause/resume are implemented. Container/gVisor `Executor` and mutation testing stay deferred.
+Phase 2 extras, generator pause/resume, and `IsolatedExecutor` are implemented. Mutation testing stays deferred. `InProcessExecutor` remains the default loop executor.
 
 ## Module rules
 

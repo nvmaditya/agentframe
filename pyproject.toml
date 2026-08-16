@@ -57,7 +57,7 @@ markers = [
 branch = true
 source = ["src/agentframe"]
 relative_files = true
-omit = ["*/site-packages/*"]
+omit = ["*/site-packages/*", "*/_isolated_worker.py"]
 
 [tool.coverage.report]
 fail_under = 90
@@ -98,6 +98,7 @@ type = "forbidden"
 source_modules = ["agentframe.runtime.loop"]
 forbidden_modules = [
     "agentframe.sandbox.inprocess",
+    "agentframe.sandbox.isolated",
     "agentframe.history.memory",
     "agentframe.runtime.openai",
     "agentframe.mcp.stdio",

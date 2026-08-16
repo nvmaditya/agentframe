@@ -18,3 +18,4 @@ Phase 1 of the OOP-native agent loop.
 - CodeAct cells see public agent fields as bare names (`worker.shout(...)` as well as `self.worker.shout(...)`)
 - `OpenAICompatibleClient` accepts optional `temperature`
 - Live Ollama examples: `examples/ollama_greeter.py`, `examples/ollama_team.py`, `examples/ollama_helper.py`
+- `IsolatedExecutor` — process-isolated cells (gVisor/`runsc` when present). Default-denies host FS and network. `InProcessExecutor` remains the loop default.

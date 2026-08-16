@@ -15,5 +15,5 @@ Synchronous think → act → observe. In-process cells. In-memory events. Scrip
 ## Phase 3 — hardening
 
 - **Pause/resume** — implemented. `AgentRuntime.iterate()` is a generator that yields `Paused` after a non-terminating CodeAct turn. Resume is `next()` on the same generator (same agent, same `EventLog`, same REPL locals). `run()` still drains to a validated return. Nested `_invoke` (calling an agentic method as a bound method) still runs to completion.
-- **Container / gVisor `Executor`** — not built.
+- **Isolated `Executor`** — implemented. `IsolatedExecutor` runs a cell in a child process (gVisor/`runsc` when present). Default-denies host filesystem and network. `InProcessExecutor` stays the loop default so pass-by-reference is unchanged. Isolated adapters do not claim live object identity.
 - **Mutation testing** on `core` / `contracts` — not built.

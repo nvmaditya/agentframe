@@ -25,6 +25,7 @@ from agentframe.sandbox import (
     ExecutionTimeout,
     Executor,
     InProcessExecutor,
+    IsolatedExecutor,
 )
 
 __version__ = "0.1.0"
@@ -45,6 +46,7 @@ __all__ = [
     "ExecutionTimeout",
     "Executor",
     "InProcessExecutor",
+    "IsolatedExecutor",
     "AgentRuntime",
     "Paused",
     "ModelClient",

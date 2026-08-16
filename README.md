@@ -42,7 +42,7 @@ Requires Python 3.11+. The only hard dependency is Pydantic v2.
 
 ## Status
 
-Phase 1 of the loop is implemented: `core`, `contracts`, `history`, `sandbox`, `runtime`. Extras: `agentframe[mcp]`, `agentframe[rag]`, `agentframe[compose]`. Pause/resume: `runtime.iterate()` yields `Paused`; `run()` still completes.
+Phase 1 of the loop is implemented: `core`, `contracts`, `history`, `sandbox`, `runtime`. Extras: `agentframe[mcp]`, `agentframe[rag]`, `agentframe[compose]`. Pause/resume: `runtime.iterate()` yields `Paused`; `run()` still completes. Isolation: `IsolatedExecutor` (child process; gVisor when `runsc` is present). `InProcessExecutor` stays the default.
 
 Documented examples live in [`examples/`](examples/) and are the Feature/E2E suite.
 

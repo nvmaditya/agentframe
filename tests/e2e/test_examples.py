@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from examples.codeact_live_list import run_example as live_list
+from examples.isolated_print import run_example as isolated_print
 from examples.pause_resume import run_example as pause_resume
 from examples.predict_classifier import run_example as classify
 from examples.validated_termination import run_example as terminate
@@ -22,3 +23,7 @@ def test_validated_termination_example() -> None:
 
 def test_pause_resume_example() -> None:
     assert pause_resume() == "hello"
+
+
+def test_isolated_print_example() -> None:
+    assert "ok" in isolated_print()
