@@ -7,7 +7,7 @@ import operator
 import sys
 from datetime import datetime
 
-from agentframe import Agent, AgentRuntime, CodeActStrategy, strategy
+from agentframe import Agent, AgentRuntime, CodeActStrategy, TurnLimitExceeded, strategy
 
 try:
     from examples.ollama_runtime import ollama_runtime
@@ -61,8 +61,17 @@ class Helper(Agent):
 
     @strategy(CodeActStrategy(max_turns=6))
     def run(self, task: str) -> str:
-        """Help with task. Use self.calculate, self.now, self.remember, self.recall. Finish with return_result(short_string)."""
+        """Help with task. Greetings: return_result('Hello! How can I help?'). Tools: self.calculate, self.now, self.remember, self.recall. Always finish with return_result(short_string)."""
         ...
+
+
+def ask(agent: Helper, task: str, runtime: AgentRuntime | None = None) -> str:
+    """One user turn. Fresh log unless a runtime is passed. Never raises TurnLimitExceeded."""
+    rt = runtime or ollama_runtime()
+    try:
+        return rt.run(agent, task)
+    except TurnLimitExceeded:
+        return "I couldn't finish that. Try a calculation, the time, or a shorter question."
 
 
 def run_example(task: str = "What is 6 * 7?", runtime: AgentRuntime | None = None) -> str:
@@ -80,10 +89,9 @@ def run_example(task: str = "What is 6 * 7?", runtime: AgentRuntime | None = Non
 
 def main(argv: list[str] | None = None) -> None:
     args = sys.argv[1:] if argv is None else argv
-    runtime = ollama_runtime()
     agent = Helper()
     if args:
-        print(runtime.run(agent, " ".join(args)))
+        print(ask(agent, " ".join(args)))
         return
     print("Helper — empty line to quit.")
     while True:
@@ -94,7 +102,7 @@ def main(argv: list[str] | None = None) -> None:
             return
         if not line:
             return
-        print(runtime.run(agent, line))
+        print(ask(agent, line))
 
 
 if __name__ == "__main__":

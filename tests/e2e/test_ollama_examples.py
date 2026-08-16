@@ -10,7 +10,7 @@ import pytest
 
 from examples.ollama_greeter import run_example as greet
 from examples.ollama_helper import run_example as help_with
-from examples.ollama_runtime import clean_cell, strip_fences
+from examples.ollama_runtime import clean_cell, ensure_return, strip_fences
 from examples.ollama_team import run_example as team
 
 
@@ -43,6 +43,12 @@ def test_clean_cell_drops_object_repr_echo() -> None:
         "return_result(self.worker.shout(task))"
     )
     assert clean_cell(raw) == "return_result(self.worker.shout(task))"
+
+
+def test_ensure_return_wraps_a_greeting() -> None:
+    assert ensure_return("Hi") == "return_result('Hi')"
+    assert clean_cell("task = str('hi')\nHi there!") == "return_result('Hi there!')"
+    assert ensure_return('return_result("Hi")') == 'return_result("Hi")'
 
 
 @_skip_live
