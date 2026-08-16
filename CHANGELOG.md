@@ -12,3 +12,4 @@ Phase 1 of the OOP-native agent loop.
 - Feature/E2E examples in `examples/`, GitHub Actions CI, import-linter contracts
 - Coverage measures the imported package (`source_pkgs`) so CI matches local runs
 - `agentframe[mcp]` — consume MCP servers as composed objects (`McpClient`, fake / stdio / Streamable HTTP)
+- `agentframe[rag]` — composed `Retriever`, `IngestionPipeline`, in-memory `VectorStore`

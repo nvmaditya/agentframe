@@ -7,4 +7,4 @@
 | [phases.md](phases.md) | What is built now vs next |
 | [superpowers/specs/2026-08-16-oop-native-agent-framework-design.md](superpowers/specs/2026-08-16-oop-native-agent-framework-design.md) | Phase 1 design spec (decisions win if docs disagree) |
 
-The `mcp` extra is implemented (`from agentframe.mcp import McpClient`). It is not imported by the Phase 1 façade.
+The `mcp` and `rag` extras are implemented (`from agentframe.mcp import McpClient`, `from agentframe.rag import Retriever`). Neither is imported by the Phase 1 façade.
