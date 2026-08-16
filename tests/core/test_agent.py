@@ -116,3 +116,20 @@ def test_agentic_call_without_runtime_raises() -> None:
 
     with pytest.raises(RuntimeUnboundError, match="run"):
         Worker().run("hi")
+
+
+def test_agentic_descriptor_on_the_class_is_the_descriptor() -> None:
+    class Worker(Agent):
+        def run(self, task: str) -> str:
+            ...
+
+    assert Worker.run.spec.name == "run"
+
+
+def test_strategy_accepts_the_class_as_shorthand() -> None:
+    class Worker(Agent):
+        @strategy(PredictStrategy)
+        def run(self, text: str) -> str:
+            ...
+
+    assert isinstance(Worker.__agentframe_agentic__["run"].strategy, PredictStrategy)

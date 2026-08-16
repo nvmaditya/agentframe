@@ -3,6 +3,11 @@ from __future__ import annotations
 import json
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from io import BytesIO
+from unittest.mock import patch
+from urllib.error import HTTPError
+
+import pytest
 
 from agentframe.runtime import ModelMessage
 from agentframe.runtime.openai import OpenAICompatibleClient
@@ -46,3 +51,11 @@ def test_openai_compatible_client_posts_chat_completions() -> None:
         assert seen["body"]["messages"][0]["content"] == "hi"
     finally:
         server.shutdown()
+
+
+def test_openai_compatible_client_surfaces_http_errors() -> None:
+    client = OpenAICompatibleClient(base_url="http://example.invalid/v1", api_key="sk", model="demo")
+    error = HTTPError("http://example.invalid/v1", 500, "no", hdrs=None, fp=BytesIO(b"boom"))
+    with patch("urllib.request.urlopen", side_effect=error):
+        with pytest.raises(RuntimeError, match="500"):
+            client.complete([ModelMessage(role="user", content="hi")])

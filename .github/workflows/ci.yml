@@ -19,7 +19,8 @@ jobs:
       - name: Install
         run: uv sync --extra dev
       - name: Tests
-        run: uv run pytest --cov --cov-fail-under=90
+        # Measure the imported package (source_pkgs), not a second copy under src/.
+        run: uv run pytest --cov=agentframe --cov-report=term-missing --cov-fail-under=90
       - name: Import contracts
         run: uv run lint-imports
 

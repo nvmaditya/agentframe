@@ -80,6 +80,19 @@ def test_missing_method_fails_before_model() -> None:
     assert model.calls == 0
 
 
+def test_deterministic_method_is_not_runnable_as_entry() -> None:
+    runtime, _, _ = _runtime(["should not be called"])
+    with pytest.raises(TypeError, match="not an agentic"):
+        runtime.run(Worker(), method="shout")
+
+
+def test_predict_raises_after_retries_exhausted() -> None:
+    runtime, events, _ = _runtime(['"nope"', '"still-nope"', '"nope-again"'])
+    with pytest.raises(Exception):
+        runtime.run(Classifier(), "buy now")
+    assert events.query(type="ValidationError")
+
+
 class Short(Agent):
     @strategy(CodeActStrategy(max_turns=1))
     def run(self, task: str) -> str:
@@ -91,6 +104,35 @@ def test_turn_limit_raises() -> None:
     runtime, _, _ = _runtime(["x = 1"])
     with pytest.raises(TurnLimitExceeded):
         runtime.run(Short(), "z")
+
+
+class ToolBox:
+    def ping(self, n: int) -> int:
+        """Echo n."""
+        return n
+
+
+class WithField(Agent):
+    box: ToolBox
+
+    def run(self, task: str) -> int:
+        """Call the composed field."""
+        ...
+
+
+def test_composed_field_methods_are_callable_from_a_cell() -> None:
+    runtime, _, model = _runtime(["return_result(self.box.ping(7))"])
+    result = runtime.run(WithField(box=ToolBox()), "go")
+    assert result == 7
+    system = model.seen[0][0].content
+    assert "self.box.ping" in system
+
+
+def test_codeact_records_stdout_and_errors_as_observations() -> None:
+    runtime, events, _ = _runtime(["print('hi')\n1/0", "return_result('ok')"])
+    assert runtime.run(Worker(), "ada") == "ok"
+    texts = [e.payload.get("text", "") for e in events.query(type="Observation")]
+    assert any("hi" in t or "ZeroDivision" in t for t in texts)
 
 
 def test_context_is_three_regions() -> None:
