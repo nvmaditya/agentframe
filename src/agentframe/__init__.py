@@ -9,6 +9,12 @@ from agentframe.core import (
     strategy,
 )
 from agentframe.history import Event, EventLog, InMemoryEventLog
+from agentframe.sandbox import (
+    ExecutionResult,
+    ExecutionTimeout,
+    Executor,
+    InProcessExecutor,
+)
 
 __version__ = "0.1.0"
 
@@ -24,5 +30,9 @@ __all__ = [
     "PredictStrategy",
     "RuntimeUnboundError",
     "strategy",
+    "ExecutionResult",
+    "ExecutionTimeout",
+    "Executor",
+    "InProcessExecutor",
 ]
 
