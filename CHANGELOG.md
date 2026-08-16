@@ -9,3 +9,4 @@ Phase 1 of the OOP-native agent loop.
 - `core` — `Agent`, `strategy`, `PredictStrategy`, `CodeActStrategy`
 - `sandbox` — `Executor`, `InProcessExecutor`
 - `runtime` — `AgentRuntime`, `ModelClient`, `ScriptedModelClient`, `OpenAICompatibleClient`
+- Feature/E2E examples in `examples/`, GitHub Actions CI, import-linter contracts

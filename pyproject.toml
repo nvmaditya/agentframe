@@ -44,6 +44,7 @@ packages = ["src/agentframe"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 markers = [
     "capability: interface-capability suite (scripted in CI; live models opt-in)",
     "adversarial: sandbox security cases",

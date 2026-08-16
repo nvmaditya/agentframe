@@ -42,7 +42,9 @@ Requires Python 3.11+. The only hard dependency is Pydantic v2.
 
 ## Status
 
-Phase 1 is being built in the open. The loop (`core`, `contracts`, `history`, `sandbox`, `runtime`) is the current work. MCP consume, RAG, and multi-agent helpers are specified and not in this install.
+Phase 1 of the loop is implemented: `core`, `contracts`, `history`, `sandbox`, `runtime`. MCP consume, RAG, and multi-agent helpers are specified and not in this install.
+
+Documented examples live in [`examples/`](examples/) and are the Feature/E2E suite.
 
 | | |
 |---|---|

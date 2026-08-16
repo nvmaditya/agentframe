@@ -35,7 +35,7 @@ If those three disagree, the **design spec wins** (it closed the PRD’s contrad
 
 | Phase | Status | Modules |
 |---|---|---|
-| 1 | in progress | `contracts`, `history`, `core`, `sandbox`, `runtime` |
+| 1 | implemented | `contracts`, `history`, `core`, `sandbox`, `runtime` |
 | 2 | specified, not built | `mcp` extra (composed `McpClient`), `rag`, `compose` |
 | 3 | named only | async pause/resume, container/gVisor executor, mutation testing |
 
