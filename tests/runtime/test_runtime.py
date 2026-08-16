@@ -128,6 +128,22 @@ def test_composed_field_methods_are_callable_from_a_cell() -> None:
     assert "self.box.ping" in system
 
 
+def test_composed_field_is_a_bare_name_in_the_cell() -> None:
+    runtime, _, _ = _runtime(["return_result(box.ping(7))"])
+    assert runtime.run(WithField(box=ToolBox()), "go") == 7
+
+
+class Probe(Agent):
+    def run(self, task: str) -> bool:
+        """Whether events is a bare name."""
+        ...
+
+
+def test_reserved_events_is_not_a_bare_cell_name() -> None:
+    runtime, _, _ = _runtime(["return_result('events' in locals())"])
+    assert runtime.run(Probe(), "t") is False
+
+
 def test_codeact_records_stdout_and_errors_as_observations() -> None:
     runtime, events, _ = _runtime(["print('hi')\n1/0", "return_result('ok')"])
     assert runtime.run(Worker(), "ada") == "ok"

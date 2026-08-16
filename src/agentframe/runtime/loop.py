@@ -8,7 +8,7 @@ from typing import Any, get_type_hints
 from pydantic import ValidationError
 
 from agentframe.contracts import validate_output
-from agentframe.core.agent import Agent
+from agentframe.core.agent import RESERVED_FIELDS, Agent
 from agentframe.core.catalog import AgenticSpec
 from agentframe.core.strategy import CodeActStrategy, PredictStrategy
 from agentframe.history.event import Event
@@ -97,6 +97,10 @@ class AgentRuntime:
         namespace: dict[str, Any] = {"self": agent, **bound}
         for name, fn in type(agent).__agentframe_tools__.items():
             namespace[name] = getattr(agent, name)
+        for name, value in vars(agent).items():
+            if name.startswith("_") or name in RESERVED_FIELDS:
+                continue
+            namespace.setdefault(name, value)
         box: list[Any] = []
 
         def return_result(value: Any) -> None:

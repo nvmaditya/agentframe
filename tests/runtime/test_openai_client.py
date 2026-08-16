@@ -49,6 +49,15 @@ def test_openai_compatible_client_posts_chat_completions() -> None:
         assert seen["path"] == "/v1/chat/completions"
         assert seen["body"]["model"] == "demo"
         assert seen["body"]["messages"][0]["content"] == "hi"
+        assert "temperature" not in seen["body"]
+        hot = OpenAICompatibleClient(
+            base_url=f"http://{host}:{port}/v1",
+            api_key="sk-test",
+            model="demo",
+            temperature=0,
+        )
+        hot.complete([ModelMessage(role="user", content="hi")])
+        assert seen["body"]["temperature"] == 0
     finally:
         server.shutdown()
 

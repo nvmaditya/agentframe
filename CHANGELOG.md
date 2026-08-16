@@ -14,4 +14,7 @@ Phase 1 of the OOP-native agent loop.
 - `agentframe[mcp]` — consume MCP servers as composed objects (`McpClient`, fake / stdio / Streamable HTTP)
 - `agentframe[rag]` — composed `Retriever`, `IngestionPipeline`, in-memory `VectorStore`
 - `agentframe[compose]` — `compose()` field assignment and `Blackboard` over `EventLog`
-- `AgentRuntime.iterate()` — generator pause/resume; yields `Paused` after a non-terminating CodeAct turn. `run()` still drains to a validated return.
+- `AgentRuntime.iterate()` — generator pause/resume; yields `Paused` after a non-terminating CodeAct turn. `run()` still drains to a validated return
+- CodeAct cells see public agent fields as bare names (`worker.shout(...)` as well as `self.worker.shout(...)`)
+- `OpenAICompatibleClient` accepts optional `temperature`
+- Live Ollama examples: `examples/ollama_greeter.py`, `examples/ollama_team.py`

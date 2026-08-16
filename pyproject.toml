@@ -50,6 +50,7 @@ pythonpath = ["src", "."]
 markers = [
     "capability: interface-capability suite (scripted in CI; live models opt-in)",
     "adversarial: sandbox security cases",
+    "ollama: live examples against a local Ollama daemon",
 ]
 
 [tool.coverage.run]

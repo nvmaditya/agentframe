@@ -46,6 +46,15 @@ Phase 1 of the loop is implemented: `core`, `contracts`, `history`, `sandbox`, `
 
 Documented examples live in [`examples/`](examples/) and are the Feature/E2E suite.
 
+Live Ollama (default `gemma3:4b` at `http://127.0.0.1:11434`):
+
+```bash
+uv run python examples/ollama_greeter.py
+uv run python examples/ollama_team.py
+```
+
+Override with `OLLAMA_HOST` / `OLLAMA_MODEL`. Live tests skip when the daemon is down or when `GITHUB_ACTIONS=true`.
+
 | | |
 |---|---|
 | Design | [`docs/superpowers/specs/2026-08-16-oop-native-agent-framework-design.md`](docs/superpowers/specs/2026-08-16-oop-native-agent-framework-design.md) |
