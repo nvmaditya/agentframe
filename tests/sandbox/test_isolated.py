@@ -39,6 +39,112 @@ def test_isolated_cannot_write_host_path(exe: IsolatedExecutor, tmp_path: Path) 
     assert secret.read_text() == "safe"
 
 
+_PATH_ESCAPE = """
+seen = []
+def walk(cls, depth=0):
+    if depth > 8:
+        return
+    try:
+        kids = getattr(cls, "__subclasses__")()
+    except Exception:
+        return
+    for c in kids:
+        seen.append(c)
+        walk(c, depth + 1)
+walk(object)
+found = None
+for c in seen:
+    try:
+        if getattr(c, "__name__", "") == "Path" and hasattr(c, "write_text"):
+            found = c
+            break
+    except Exception:
+        pass
+if found is None:
+    raise RuntimeError("no Path")
+p = found({path!r})
+p.write_text("pwned")
+p.read_text()
+"""
+
+_FILEIO_ESCAPE = """
+seen = []
+def walk(cls, depth=0):
+    if depth > 8:
+        return
+    try:
+        kids = getattr(cls, "__subclasses__")()
+    except Exception:
+        return
+    for c in kids:
+        seen.append(c)
+        walk(c, depth + 1)
+walk(object)
+found = None
+for c in seen:
+    if getattr(c, "__name__", "") in ("FileIO", "BufferedWriter"):
+        found = c
+        break
+if found is None:
+    raise RuntimeError("no FileIO")
+f = found({path!r}, "w")
+f.write(b"pwned")
+f.close()
+"pwned"
+"""
+
+_SOCKET_ESCAPE = """
+seen = []
+def walk(cls, depth=0):
+    if depth > 8:
+        return
+    try:
+        kids = getattr(cls, "__subclasses__")()
+    except Exception:
+        return
+    for c in kids:
+        seen.append(c)
+        walk(c, depth + 1)
+walk(object)
+sock = None
+for c in seen:
+    if getattr(c, "__name__", "") == "socket" and callable(c):
+        sock = c
+        break
+if sock is None:
+    raise RuntimeError("no socket")
+s = sock()
+s.settimeout(2)
+s.connect(("1.1.1.1", 80))
+s.close()
+"connected"
+"""
+
+
+def test_isolated_cannot_write_via_recovered_path(exe: IsolatedExecutor, tmp_path: Path) -> None:
+    secret = tmp_path / "secret.txt"
+    secret.write_text("safe")
+    result = exe.execute(_PATH_ESCAPE.format(path=str(secret)), {})
+    assert result.error is not None
+    assert result.display != "pwned"
+    assert secret.read_text() == "safe"
+
+
+def test_isolated_cannot_write_via_recovered_fileio(exe: IsolatedExecutor, tmp_path: Path) -> None:
+    secret = tmp_path / "secret.txt"
+    secret.write_text("safe")
+    result = exe.execute(_FILEIO_ESCAPE.format(path=str(secret)), {})
+    assert result.error is not None
+    assert result.display != "pwned"
+    assert secret.read_text() == "safe"
+
+
+def test_isolated_cannot_connect_via_recovered_socket(exe: IsolatedExecutor) -> None:
+    result = exe.execute(_SOCKET_ESCAPE, {})
+    assert result.error is not None
+    assert result.display != "connected"
+
+
 def test_isolated_cannot_open_network(exe: IsolatedExecutor) -> None:
     for source in (
         "import socket",

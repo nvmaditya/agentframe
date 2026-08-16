@@ -6,7 +6,10 @@ import json
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any
+
+_WORKER = Path(__file__).resolve().with_name("_isolated_worker.py")
 
 from agentframe.sandbox.executor import Executor
 from agentframe.sandbox.result import ExecutionResult, ExecutionTimeout, ForbiddenName
@@ -82,7 +85,7 @@ class IsolatedExecutor(Executor):
             "namespace": _jsonable_namespace(namespace),
             "timeout_seconds": self.timeout_seconds,
         }
-        cmd = [sys.executable, "-m", "agentframe.sandbox._isolated_worker"]
+        cmd = [sys.executable, "-I", str(_WORKER)]
         if self.use_gvisor:
             runsc = shutil.which("runsc")
             if runsc:
