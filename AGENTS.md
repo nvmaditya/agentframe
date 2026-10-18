@@ -62,10 +62,11 @@ uv run pytest --cov --cov-fail-under=90
 uv run lint-imports
 ```
 
-- Tests first (red → green → refactor). A test that passes before the code exists is not a test.
+- Tests first (red → green → refactor). The red-bar test for new behavior must fail before that behavior exists. A regression lock may land in the same change for behavior a ticket says must keep holding. The test name states that behavior. The lock is not the proof of the new behavior.
 - Drive the real public entry point. Do not re-implement the unit under test inside the test.
 - Feature/E2E uses `ScriptedModelClient`. Do not add live-model calls to the default suite.
 - Interface-capability against a real model is opt-in (`AGENTFRAME_CAPABILITY=1`). CI runs the same scenarios against the scripted client.
+- The seal’s day-14 kill is opt-in and stays out of the default suite. Five held-out tasks on a local model, with no host rewriter: mutate a field, reduce 10k rows without those rows entering the log, a bad type then a good type, one real method call, and a turn limit that raises. If they need `clean_cell` in `examples/ollama_runtime.py`, stop the later seal tickets.
 
 ## Commit style
 

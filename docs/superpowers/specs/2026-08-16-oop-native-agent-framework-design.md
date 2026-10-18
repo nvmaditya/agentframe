@@ -234,7 +234,7 @@ host application
 │  classify call → Predict loop or CodeAct loop            │
 │  render three-region context                             │
 │  ModelClient.complete(...)                               │
-│  (CodeAct) Executor.execute(source, namespace)           │
+│  (CodeAct) one fence, then execute with cell timeout     │
 │  contracts.validate_output(...)                          │
 │  EventLog.append(...)                                    │
 └───────┬───────────────┬───────────────────┬──────────────┘
@@ -348,7 +348,7 @@ No module-level log. The host (or `AgentRuntime`) owns the instance.
 
 ### 8.4 `sandbox` — in-process cells
 
-**`Executor` interface:** `execute(source: str, namespace: dict) -> ExecutionResult`.
+**`Executor` interface:** `execute(source: str, namespace: dict, *, timeout_seconds: float | None = None) -> ExecutionResult`. Omit `timeout_seconds` and the executor uses its own deadline. The loop passes `CodeActStrategy.cell_timeout_seconds`.
 
 **`ExecutionResult` fields:** `stdout: str`, `stderr: str`, `display` (value of the last expression if the cell’s last statement is an expression, else `None`), `error` (`Exception` instance or `None`), `timed_out: bool`.
 
@@ -447,8 +447,8 @@ Media (images/audio/files as native content blocks) is not in Phase 1. Arguments
 ### 9.3 CodeAct turn
 
 1. Render §9.2.
-2. `ModelClient.complete` → `content` is treated as Python source (a cell). Append `ModelTurn`.
-3. `Executor.execute(content, namespace)`. Append `Execution` (stdout/stderr/error/timeout flags, not the live objects).
+2. `ModelClient.complete` → `content`. The loop strips one wrapping markdown fence and does not rewrite prose into a return. Append `ModelTurn` with the raw model text.
+3. `Executor.execute(cell, namespace, timeout_seconds=cell_timeout_seconds)`. Append `Execution` (stdout/stderr/error/timeout flags, not the live objects).
 4. If the runtime’s `return_result` side channel is set: `validate_output(value, return_annotation)`.
    - Success: append `Termination`, return `value` to the host.
    - Failure: append `ValidationError` with the error text, clear the side channel, continue the loop.

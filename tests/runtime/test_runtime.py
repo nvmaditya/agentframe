@@ -80,6 +80,7 @@ def test_runtime_refuses_an_executor_that_cannot_keep_the_live_object() -> None:
 
 
 def test_codeact_returns_the_live_tail_of_a_large_list() -> None:
+    """Regression lock: the tail stays the caller's object, and the middle stays out of the log."""
     sentinel = "middle-sentinel-7c1e"
     tail = "live-tail-7c1e"
     data = [0] * 10_000
@@ -97,6 +98,56 @@ def test_codeact_returns_the_live_tail_of_a_large_list() -> None:
     assert result is data[-1]
     dumped = " ".join(str(e.payload) for e in events.query())
     assert sentinel not in dumped
+
+
+def test_fenced_cell_returns_the_annotated_value() -> None:
+    class Speaker(Agent):
+        @strategy(CodeActStrategy(max_turns=1))
+        def run(self) -> str:
+            """Say ok."""
+            ...
+
+    cell = "```python\nreturn_result('ok')\n```"
+    runtime, _, _ = _runtime([cell])
+    assert runtime.run(Speaker()) == "ok"
+
+
+def test_prose_is_an_observation_and_the_next_cell_returns() -> None:
+    """Regression lock: prose is not rewritten into a successful return."""
+
+    class Speaker(Agent):
+        def run(self) -> str:
+            """Say ok."""
+            ...
+
+    runtime, events, _ = _runtime(["not python!!!", "return_result('ok')"])
+    assert runtime.run(Speaker()) == "ok"
+    texts = [e.payload.get("text", "") for e in events.query(type="Observation")]
+    assert any("SyntaxError" in text for text in texts)
+
+
+def test_cell_past_the_strategy_timeout_is_an_observation() -> None:
+    class Slow(Agent):
+        @strategy(CodeActStrategy(max_turns=2, cell_timeout_seconds=0.05))
+        def run(self) -> str:
+            """Return after a slow cell."""
+            ...
+
+    events = InMemoryEventLog()
+    runtime = AgentRuntime(
+        model=ScriptedModelClient(
+            [
+                "import time\ntime.sleep(0.3)\nreturn_result('late')",
+                "return_result('ok')",
+            ]
+        ),
+        executor=InProcessExecutor(timeout_seconds=10, allowed_imports=("time",)),
+        events=events,
+    )
+    assert runtime.run(Slow()) == "ok"
+    assert events.query(type="Execution")[0].payload["timed_out"] is True
+    texts = [e.payload.get("text", "") for e in events.query(type="Observation")]
+    assert any("ExecutionTimeout" in text for text in texts)
 
 
 def test_validated_termination_rejects_then_accepts() -> None:

@@ -122,7 +122,11 @@ class AgentRuntime:
             response = self.model.complete(messages)
             self._append("ModelTurn", {"content": response.content}, agent_id)
             box.clear()
-            result: ExecutionResult = self.executor.execute(response.content, namespace)
+            result: ExecutionResult = self.executor.execute(
+                _one_fence(response.content),
+                namespace,
+                timeout_seconds=strategy.cell_timeout_seconds,
+            )
             self._append(
                 "Execution",
                 {
@@ -200,6 +204,14 @@ def _drain(steps: Iterator[Paused]) -> Any:
 
 def _parse_predict(content: str) -> Any:
     return json.loads(content)
+
+
+def _one_fence(content: str) -> str:
+    """Drop one wrapping markdown fence. Leave every other string unchanged."""
+    lines = content.strip().splitlines()
+    if len(lines) >= 2 and lines[0].lstrip().startswith("```") and lines[-1].strip() == "```":
+        return "\n".join(lines[1:-1]).strip()
+    return content
 
 
 def _format_error(error: Exception) -> str:

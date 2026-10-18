@@ -19,3 +19,4 @@ Phase 1 of the OOP-native agent loop.
 - `OpenAICompatibleClient` accepts optional `temperature`
 - Live Ollama examples: `examples/ollama_greeter.py`, `examples/ollama_team.py`, `examples/ollama_helper.py`
 - `IsolatedExecutor` — process-isolated cells (gVisor/`runsc` when present). Default-denies host FS and network. Direct cell runner only: `AgentRuntime` refuses an executor that does not keep the live object. `InProcessExecutor` is the loop executor.
+- The loop strips one wrapping markdown fence and applies `CodeActStrategy.cell_timeout_seconds`. Prose is not rewritten into a return.

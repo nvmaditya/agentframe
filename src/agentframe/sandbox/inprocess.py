@@ -31,7 +31,14 @@ class InProcessExecutor(Executor):
         self.allowed_imports = frozenset(allowed_imports)
         self.allowed_open_paths = tuple(allowed_open_paths)
 
-    def execute(self, source: str, namespace: dict[str, Any]) -> ExecutionResult:
+    def execute(
+        self,
+        source: str,
+        namespace: dict[str, Any],
+        *,
+        timeout_seconds: float | None = None,
+    ) -> ExecutionResult:
+        limit = self.timeout_seconds if timeout_seconds is None else timeout_seconds
         try:
             tree = ast.parse(source)
             self._reject(tree)
@@ -43,11 +50,11 @@ class InProcessExecutor(Executor):
         rest, expr = _split_last_expr(tree)
         loc = dict(namespace)
         loc["__builtins__"] = self._builtins()
-        deadline = time.monotonic() + self.timeout_seconds
+        deadline = time.monotonic() + limit
 
         def tracer(_frame: Any, _event: str, _arg: Any) -> Any:
             if time.monotonic() > deadline:
-                raise ExecutionTimeout(self.timeout_seconds)
+                raise ExecutionTimeout(limit)
             return tracer
 
         stdout = io.StringIO()

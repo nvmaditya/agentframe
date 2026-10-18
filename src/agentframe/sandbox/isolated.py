@@ -79,11 +79,18 @@ class IsolatedExecutor(Executor):
         self.timeout_seconds = timeout_seconds
         self.use_gvisor = gvisor_available() if use_gvisor is None else use_gvisor
 
-    def execute(self, source: str, namespace: dict) -> ExecutionResult:
+    def execute(
+        self,
+        source: str,
+        namespace: dict,
+        *,
+        timeout_seconds: float | None = None,
+    ) -> ExecutionResult:
+        limit = self.timeout_seconds if timeout_seconds is None else timeout_seconds
         payload = {
             "source": source,
             "namespace": _jsonable_namespace(namespace),
-            "timeout_seconds": self.timeout_seconds,
+            "timeout_seconds": limit,
         }
         cmd = [sys.executable, "-I", str(_WORKER)]
         if self.use_gvisor:
@@ -96,13 +103,13 @@ class IsolatedExecutor(Executor):
                 input=json.dumps(payload),
                 capture_output=True,
                 text=True,
-                timeout=self.timeout_seconds + 1.0,
+                timeout=limit + 1.0,
                 check=False,
             )
         except subprocess.TimeoutExpired:
             return ExecutionResult(
                 timed_out=True,
-                error=ExecutionTimeout(self.timeout_seconds),
+                error=ExecutionTimeout(limit),
             )
         if completed.returncode != 0:
             err = completed.stderr.strip() or completed.stdout.strip() or "isolated worker failed"
