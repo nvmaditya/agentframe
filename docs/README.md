@@ -7,4 +7,4 @@
 | [phases.md](phases.md) | What is built now vs next |
 | [superpowers/specs/2026-08-16-oop-native-agent-framework-design.md](superpowers/specs/2026-08-16-oop-native-agent-framework-design.md) | Phase 1 design spec (decisions win if docs disagree) |
 
-Extras `mcp`, `rag`, and `compose` are implemented. None of them is imported by the Phase 1 façade. Generator pause/resume (`AgentRuntime.iterate` / `Paused`) and `IsolatedExecutor` are implemented; mutation testing is not.
+Extras `mcp`, `rag`, and `compose` are implemented. None of them is imported by the Phase 1 façade. Generator pause/resume (`AgentRuntime.iterate` / `Paused`) is implemented. `IsolatedExecutor` runs a cell outside the loop; `AgentRuntime` refuses an executor that does not keep the live object. Mutation testing is not built.

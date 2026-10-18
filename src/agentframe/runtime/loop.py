@@ -31,6 +31,11 @@ class AgentRuntime:
         *,
         default_agent_id: str | None = None,
     ) -> None:
+        if not getattr(executor, "keeps_live_objects", False):
+            raise TypeError(
+                "the runtime requires an executor that keeps the live object, "
+                "its methods, and return_result"
+            )
         self.model = model
         self.executor = executor
         self.events = events

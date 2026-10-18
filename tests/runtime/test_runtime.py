@@ -12,6 +12,7 @@ from agentframe import (
     CodeActStrategy,
     InMemoryEventLog,
     InProcessExecutor,
+    IsolatedExecutor,
     PredictStrategy,
     strategy,
 )
@@ -64,6 +65,38 @@ def test_codeact_pass_by_reference_and_preview_bounds() -> None:
     assert result is data[-1]
     dumped = " ".join(str(e.payload) for e in events.query())
     assert "50" not in dumped
+
+
+def test_runtime_refuses_an_executor_that_cannot_keep_the_live_object() -> None:
+    events = InMemoryEventLog()
+    model = ScriptedModelClient(["return_result(1)"])
+    with pytest.raises(
+        TypeError,
+        match="keeps the live object, its methods, and return_result",
+    ):
+        AgentRuntime(model=model, executor=IsolatedExecutor(), events=events)
+    assert model.calls == 0
+    assert list(events.query()) == []
+
+
+def test_codeact_returns_the_live_tail_of_a_large_list() -> None:
+    sentinel = "middle-sentinel-7c1e"
+    tail = "live-tail-7c1e"
+    data = [0] * 10_000
+    data[5_000] = sentinel
+    data[-1] = tail
+
+    class BulkIndexer(Agent):
+        def run(self, rows: list) -> str:
+            """Return the last item of rows by indexing it."""
+            ...
+
+    runtime, events, _ = _runtime(["return_result(rows[-1])"])
+    result = runtime.run(BulkIndexer(), data)
+    assert result == "live-tail-7c1e"
+    assert result is data[-1]
+    dumped = " ".join(str(e.payload) for e in events.query())
+    assert sentinel not in dumped
 
 
 def test_validated_termination_rejects_then_accepts() -> None:

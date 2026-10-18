@@ -18,6 +18,8 @@ FORBIDDEN_ATTRS = frozenset({"__subclasses__", "__globals__", "__code__", "__bui
 
 
 class InProcessExecutor(Executor):
+    keeps_live_objects = True
+
     def __init__(
         self,
         *,

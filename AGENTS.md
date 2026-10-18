@@ -14,7 +14,7 @@ Instructions for humans and coding agents working in this repository.
 | Agentic methods | public methods whose body is `...` |
 | Prompt | class and method docstrings |
 | Contracts | type annotations + `contracts.validate_output` |
-| Actions | generated Python cells (`InProcessExecutor` default; `IsolatedExecutor` optional) |
+| Actions | generated Python cells (`InProcessExecutor`; the runtime refuses an executor that does not keep the live object) |
 | Workflow | ordinary `if` / `for` / `while` |
 | History | append-only `EventLog` |
 | MCP server | composed field (`McpClient`), not a second protocol |
@@ -37,9 +37,9 @@ If those three disagree, the **design spec wins** (it closed the PRD’s contrad
 |---|---|---|
 | 1 | implemented | `contracts`, `history`, `core`, `sandbox`, `runtime` |
 | 2 | mcp, rag, and compose extras implemented | composed `McpClient`, `Retriever`, `compose()` / `Blackboard` |
-| 3 | pause/resume and isolated executor implemented; mutation deferred | `AgentRuntime.iterate` / `Paused`; `IsolatedExecutor` (process / gVisor when `runsc` exists); mutation testing |
+| 3 | pause/resume implemented; isolated executor is not a loop peer; mutation deferred | `AgentRuntime.iterate` / `Paused`; `IsolatedExecutor` is a direct cell runner (process / gVisor when `runsc` exists) and `AgentRuntime` refuses it; mutation testing |
 
-Phase 2 extras, generator pause/resume, and `IsolatedExecutor` are implemented. Mutation testing stays deferred. `InProcessExecutor` remains the default loop executor.
+Phase 2 extras and generator pause/resume are implemented. `IsolatedExecutor` runs a cell outside the loop. `AgentRuntime` raises if the executor does not keep the live object. Mutation testing stays deferred. `InProcessExecutor` is the loop executor.
 
 ## Module rules
 

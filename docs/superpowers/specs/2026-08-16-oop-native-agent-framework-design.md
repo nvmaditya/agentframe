@@ -41,7 +41,7 @@ Phase 1 is one implementation-plan-sized slice: a synchronous, in-process, code-
 | `rag` extra (`Retriever`, ingestion, vector-store adapters) | Product goal G5, not this build. The removable-test rule is recorded so Phase 2 cannot leak into `core`. |
 | `compose` extra (manager/worker helpers, blackboard-over-history) | Multi-agent in Phase 1 is ordinary object composition: assign an `Agent` to a field. No helper ships. |
 | Generator / async pause-resume, streaming | Phase 1 `ModelClient.complete` and `AgentRuntime.run` are synchronous. Generator pause/resume later shipped as `AgentRuntime.iterate()` / `Paused` (`run()` still drains). Token streaming and `async def` agentic methods stay later. |
-| Container / gVisor / per-action subprocess `Executor` | Host isolation is a deployment concern. Per-action subprocess would break pass-by-reference. Later shipped as optional `IsolatedExecutor`; `InProcessExecutor` stays the loop default. |
+| Container / gVisor / per-action subprocess `Executor` | Host isolation is a deployment concern. Per-action subprocess would break pass-by-reference. Later shipped as `IsolatedExecutor`, a direct cell runner. `AgentRuntime` refuses an executor that does not keep the live object. `InProcessExecutor` is the loop executor. |
 | Persistent event-log backends (SQLite/file/Postgres) | Default is in-memory until a durability need exists. |
 | `litellm`, native Anthropic adapter, multimodal content | One `ModelClient` protocol + one OpenAI-compatible adapter. Text in, text out. |
 | Record/replay (VCR) E2E and live interface-capability CI | Feature/E2E uses a scripted mock. Live-model fluency tests are a later, separate track. |
@@ -261,7 +261,7 @@ host application
 | History | `EventLog` | `InMemoryEventLog` | SQLite / file |
 | MCP wire | `McpTransport` | (not in Phase 1 install) `StdioTransport`, `StreamableHttpTransport`, `FakeMcpTransport` | — |
 
-One adapter is a hypothetical seam; two is a real one. `ModelClient` already has two Phase 1 adapters (network + scripted), so that seam is real. `Executor` and `EventLog` are versioned interfaces now so Phase 2/3 can add adapters without rewriting `runtime`; Phase 1 still ships only one of each. `McpTransport` becomes a real seam when the extra ships two live adapters plus the fake.
+One adapter is a hypothetical seam; two is a real one. `ModelClient` already has two Phase 1 adapters (network + scripted), so that seam is real. `Executor` and `EventLog` are versioned interfaces now so Phase 2/3 can add adapters without rewriting `runtime`; Phase 1 still ships only one of each. `IsolatedExecutor` later shipped as a direct cell runner. `AgentRuntime` refuses an executor that does not keep the live object, so that runner is not a second loop adapter. `McpTransport` becomes a real seam when the extra ships two live adapters plus the fake.
 
 **Dependency direction (import-linter layers):**
 
@@ -544,7 +544,7 @@ The following are easy to “just add” and are explicitly **not** Phase 1:
 - MCP *server* role (export an `Agent` over MCP), sampling, `resources/subscribe`, `roots`, in-library MCP config-file loading
 - `compose()`, pub/sub helpers
 - `async def` agentic methods, token streaming (generator pause/resume shipped as `iterate()` / `Paused`)
-- IsolatedExecutor as the default loop executor (shipped as optional; `InProcessExecutor` stays default)
+- IsolatedExecutor as a loop executor (it ships as a direct cell runner; `AgentRuntime` refuses an executor that does not keep the live object; `InProcessExecutor` is the loop executor)
 - Persistent `EventLog` adapters
 - `@tool` decorator (rejected, not deferred)
 - `litellm` (rejected for Phase 1, not deferred as a hidden default)
